@@ -521,11 +521,20 @@
           return;
         }
 
-        if (payload.type === 'message' && payload.tempId) {
-          confirmSentMessage(payload.tempId, payload);
-        } else {
-          addMessageToUI(payload);
+        // 修复：区分“自己发的消息回执”和“别人发来的新消息”
+        if (payload.type === 'message') {
+          if (payload.tempId && pendingMessages.has(payload.tempId)) {
+            // 如果 tempId 存在，且在本地待发送列表里，说明是服务器回传的自己的消息
+            confirmSentMessage(payload.tempId, payload);
+          } else {
+            // 否则是别人发来的消息，直接渲染到界面
+            addMessageToUI(payload);
+          }
+          return;
         }
+
+        // 其他类型（如 system 系统消息）正常渲染
+        addMessageToUI(payload);
       } catch (e) {
         console.warn('非 JSON 消息:', event.data);
       }
