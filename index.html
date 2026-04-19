@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Cloudflare 聊天室 · 实时协作</title>
+  <title>ZZJ聊天室</title>
   <style>
     * {
       margin: 0;
@@ -53,6 +53,7 @@
       display: flex;
       align-items: center;
       gap: 12px;
+      flex-wrap: wrap;
     }
 
     .room-badge {
@@ -64,6 +65,39 @@
       font-size: 0.9rem;
       letter-spacing: 0.3px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .room-control {
+      display: flex;
+      gap: 6px;
+    }
+
+    .room-control input {
+      padding: 6px 12px;
+      border-radius: 40px;
+      border: 1px solid rgba(0,0,0,0.1);
+      background: white;
+      font-size: 0.85rem;
+      outline: none;
+      width: 140px;
+    }
+
+    .room-control button {
+      background: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.02);
+      transition: all 0.15s;
+    }
+
+    .room-control button:hover {
+      background: #1e293b;
+      color: white;
     }
 
     .connection-status {
@@ -290,6 +324,7 @@
       .chat-header { padding: 14px 16px; }
       .messages-container { padding: 14px 12px; }
       .message-bubble { max-width: 90%; }
+      .room-control input { width: 110px; }
     }
   </style>
 </head>
@@ -297,10 +332,14 @@
 <div class="chat-container">
   <div class="chat-header">
     <div class="room-info">
-      <span class="room-badge" id="roomNameDisplay">加载中...</span>
+      <span class="room-badge" id="roomNameDisplay">未加入房间</span>
+      <div class="room-control">
+        <input type="text" id="roomInput" placeholder="房间名" value="lobby" />
+        <button id="joinRoomBtn">加入</button>
+      </div>
       <div class="connection-status">
         <span class="status-dot" id="connectionDot"></span>
-        <span id="statusText">连接中</span>
+        <span id="statusText">未连接</span>
       </div>
     </div>
     <div class="header-actions">
@@ -310,12 +349,12 @@
   </div>
 
   <div class="messages-container" id="messagesContainer">
-    <div class="empty-messages">✨ 欢迎来到聊天室，等待第一条消息…</div>
+    <div class="empty-messages">✨ 输入房间名并点击「加入」开始聊天</div>
   </div>
 
   <div class="chat-footer">
-    <input type="text" id="messageInput" placeholder="输入消息..." autocomplete="off" />
-    <button id="sendBtn" title="发送 (Enter)">➤</button>
+    <input type="text" id="messageInput" placeholder="输入消息..." autocomplete="off" disabled />
+    <button id="sendBtn" title="发送 (Enter)" disabled>➤</button>
   </div>
 </div>
 
@@ -324,15 +363,19 @@
     "use strict";
 
     // ---------- 配置 ----------
-    const WS_URL = `https://chatapi.zzjjack.us.kg/`;
+    // 修改为你的 Worker 域名（支持 wss 协议）
+    const BACKEND_HOST = 'chatapi.zzjjack.us.kg';  // 请替换为你的实际域名
+    let currentRoom = '';
     let socket = null;
-    let clientId = null;          // 自己的 ID（首次收到带 ID 的消息时设置）
+    let clientId = null;
     let isConnected = false;
     let reconnectTimer = null;
-    let manualDisconnect = false; // 是否手动断开
+    let manualDisconnect = false;
 
     // DOM 元素
     const roomNameSpan = document.getElementById('roomNameDisplay');
+    const roomInput = document.getElementById('roomInput');
+    const joinRoomBtn = document.getElementById('joinRoomBtn');
     const statusDot = document.getElementById('connectionDot');
     const statusText = document.getElementById('statusText');
     const messagesContainer = document.getElementById('messagesContainer');
@@ -342,16 +385,6 @@
     const clearChatBtn = document.getElementById('clearChatBtn');
 
     // ---------- 工具函数 ----------
-    function getRoomNameFromPath() {
-      const path = window.location.pathname;
-      const parts = path.split('/').filter(p => p.length > 0);
-      if (parts.length >= 2 && parts[0] === 'room') {
-        return parts[1];
-      }
-      // 默认房间名
-      return 'lobby';
-    }
-
     function formatTime(timestamp) {
       const date = new Date(timestamp);
       return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
@@ -367,29 +400,24 @@
       statusText.textContent = s.text;
       statusDot.className = `status-dot ${s.class}`;
       
-      // 更新发送按钮状态
       sendBtn.disabled = !isConnected;
       messageInput.disabled = !isConnected;
       if (!isConnected) {
-        messageInput.placeholder = '连接断开，正在重连...';
+        messageInput.placeholder = '未连接，无法发送';
       } else {
         messageInput.placeholder = '输入消息...';
       }
     }
 
-    // 滚动到底部
     function scrollToBottom() {
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
-    // 清空消息区域（保留空状态提示）
     function clearMessages() {
       messagesContainer.innerHTML = '<div class="empty-messages">✨ 对话已清空，开始聊天吧</div>';
     }
 
-    // 添加一条消息到界面
     function addMessageToUI(payload) {
-      // 移除默认空提示
       const emptyMsg = messagesContainer.querySelector('.empty-messages');
       if (emptyMsg) emptyMsg.remove();
 
@@ -399,7 +427,6 @@
       const { type, clientId: msgClientId, content, timestamp } = payload;
       const timeStr = formatTime(timestamp || Date.now());
 
-      // 处理系统消息
       if (type === 'system') {
         row.classList.add('system');
         const bubble = document.createElement('div');
@@ -411,21 +438,18 @@
         return;
       }
 
-      // 普通聊天消息
       const isSelf = (msgClientId && clientId && msgClientId === clientId);
       row.classList.add(isSelf ? 'self' : 'other');
 
       const bubble = document.createElement('div');
       bubble.className = 'message-bubble';
 
-      // 元数据行 (发送者 + 时间)
       const meta = document.createElement('div');
       meta.className = 'message-meta';
       
       if (!isSelf) {
         const senderSpan = document.createElement('span');
         senderSpan.className = 'message-sender';
-        // 显示短 ID（取前6位）
         senderSpan.textContent = msgClientId ? `用户 ${msgClientId.slice(0,6)}` : '未知';
         meta.appendChild(senderSpan);
       }
@@ -437,7 +461,6 @@
 
       bubble.appendChild(meta);
 
-      // 消息内容
       const contentDiv = document.createElement('div');
       contentDiv.className = 'message-content';
       contentDiv.textContent = content || '';
@@ -448,39 +471,20 @@
       scrollToBottom();
     }
 
-    // ---------- WebSocket 消息处理 ----------
+    // ---------- WebSocket 处理 ----------
     function handleSocketMessage(event) {
       try {
         const payload = JSON.parse(event.data);
         
-        // 如果消息中包含 clientId，且我们还没有记录自己的 ID，且这条消息是我们自己触发的（通过某些手段判断）
-        // 简单方案：假设第一次收到包含 clientId 的消息并且该消息不是系统消息，我们可以用它来设置自己？
-        // 更好的做法：后端在连接时主动发送一条 welcome 消息。我们这里采用一种启发式方法：
-        // 如果 payload.clientId 存在且 clientId 为 null，暂不盲目设置，因为可能是别人的消息。
-        // 我们可以在发送第一条消息后从服务器回显中设置自己的 ID。
-        // 这里修改为：如果发送消息后，收到一条 type='message' 且 payload.clientId 与发送时临时ID匹配？太复杂。
-        // 实际上后端会在每条消息中带上发送者的 clientId。我们可以在第一次收到自己发送的消息时，将 clientId 记录下来。
-        // 但首次连接时我们没有 ID，无法判断哪条是自己的。
-        // 因此我们可以在连接建立后，主动发送一条特殊的 "identify" 请求，让后端返回自己的 ID。
-        // 不过为了简化，我们可以在收到任意消息时，如果还没有 clientId 并且该消息的 clientId 存在，就假设它是自己？
-        // 不安全，因为可能是别人发的。所以最佳实践是后端在 webSocketOpen 时推送一条系统消息包含 clientId。
-        
-        // 为了演示，这里采用一种更稳健的方法：连接成功后发送一条加入消息，并从加入消息的广播回显中提取 clientId？
-        // 但广播的加入消息的 clientId 是发送者（自己），所以可以识别。
-        
-        // 我们可以在 onopen 中发送 {type: 'join', content: 'joined'}，后端广播此消息，其中 clientId 就是我们自己。
-        // 这样我们就可以提取 clientId。
-        
-        if (payload.type === 'join' && payload.clientId && !clientId) {
+        // 从欢迎消息或加入消息中提取自己的 clientId
+        if (payload.type === 'system' && payload.clientId && !clientId) {
           clientId = payload.clientId;
-          console.log('自己的 ID 已设置为:', clientId);
+          console.log('自己的 ID:', clientId);
         }
         
-        // 添加到界面
         addMessageToUI(payload);
       } catch (e) {
-        console.warn('收到非 JSON 消息:', event.data);
-        // 显示为纯文本系统消息
+        console.warn('非 JSON 消息:', event.data);
         addMessageToUI({
           type: 'system',
           content: event.data,
@@ -493,19 +497,6 @@
       isConnected = true;
       manualDisconnect = false;
       updateConnectionStatus('connected');
-      
-      // 连接成功后发送加入消息（用于让服务器广播，并让我们获取自己的 clientId）
-      sendJoinMessage();
-      
-      // 可以拉取历史消息？本示例未实现持久化拉取，但可以扩展。
-    }
-
-    function sendJoinMessage() {
-      if (!socket || socket.readyState !== WebSocket.OPEN) return;
-      socket.send(JSON.stringify({
-        type: 'join',
-        content: '加入了聊天室'
-      }));
     }
 
     function handleSocketClose(event) {
@@ -513,34 +504,37 @@
       updateConnectionStatus('disconnected');
       
       if (!manualDisconnect) {
-        // 自动重连
         scheduleReconnect();
       }
     }
 
     function handleSocketError(error) {
       console.error('WebSocket 错误:', error);
-      // 关闭后会触发 close 事件，在 close 中处理重连
     }
 
     function scheduleReconnect() {
       if (reconnectTimer) clearTimeout(reconnectTimer);
       updateConnectionStatus('connecting');
       reconnectTimer = setTimeout(() => {
-        connectWebSocket();
+        if (currentRoom) {
+          connectWebSocket(currentRoom);
+        }
       }, 3000);
     }
 
-    function connectWebSocket() {
+    function connectWebSocket(roomName) {
       if (socket) {
         socket.close();
         socket = null;
       }
       
       updateConnectionStatus('connecting');
+      clientId = null;  // 重置 ID
+      
+      const wsUrl = `wss://${BACKEND_HOST}/room/${roomName}`;
       
       try {
-        socket = new WebSocket(WS_URL);
+        socket = new WebSocket(wsUrl);
         socket.addEventListener('open', handleSocketOpen);
         socket.addEventListener('message', handleSocketMessage);
         socket.addEventListener('close', handleSocketClose);
@@ -551,7 +545,33 @@
       }
     }
 
-    // 发送消息
+    function joinRoom(roomName) {
+      if (!roomName.trim()) {
+        alert('请输入房间名');
+        return;
+      }
+      
+      // 断开旧连接
+      if (socket) {
+        manualDisconnect = true;
+        socket.close();
+        socket = null;
+      }
+      
+      currentRoom = roomName.trim();
+      roomNameSpan.textContent = `# ${currentRoom}`;
+      
+      // 清空消息并显示切换房间提示
+      clearMessages();
+      addMessageToUI({
+        type: 'system',
+        content: `正在加入房间 ${currentRoom} ...`,
+        timestamp: Date.now()
+      });
+      
+      connectWebSocket(currentRoom);
+    }
+
     function sendMessage(content) {
       if (!content.trim()) return;
       if (!socket || socket.readyState !== WebSocket.OPEN) {
@@ -570,10 +590,17 @@
 
     // ---------- 事件绑定与初始化 ----------
     function init() {
-      const roomName = getRoomNameFromPath();
-      roomNameSpan.textContent = `# ${roomName}`;
+      // 加入房间按钮
+      joinRoomBtn.addEventListener('click', () => {
+        joinRoom(roomInput.value);
+      });
       
-      connectWebSocket();
+      // 回车也可加入
+      roomInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          joinRoom(roomInput.value);
+        }
+      });
       
       // 发送按钮
       sendBtn.addEventListener('click', () => {
@@ -581,7 +608,6 @@
         messageInput.value = '';
       });
       
-      // 回车发送
       messageInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
@@ -590,29 +616,32 @@
         }
       });
       
-      // 重连按钮
       reconnectBtn.addEventListener('click', () => {
-        manualDisconnect = false;
-        if (reconnectTimer) {
-          clearTimeout(reconnectTimer);
-          reconnectTimer = null;
+        if (currentRoom) {
+          manualDisconnect = false;
+          if (reconnectTimer) {
+            clearTimeout(reconnectTimer);
+            reconnectTimer = null;
+          }
+          connectWebSocket(currentRoom);
+        } else {
+          alert('请先加入一个房间');
         }
-        connectWebSocket();
       });
       
-      // 清屏按钮
       clearChatBtn.addEventListener('click', () => {
         clearMessages();
       });
       
-      // 页面关闭前清理
       window.addEventListener('beforeunload', () => {
         manualDisconnect = true;
         if (socket) socket.close();
       });
+
+      // 初始状态：未连接
+      updateConnectionStatus('disconnected');
     }
 
-    // 启动
     init();
   })();
 </script>
