@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ZZJ实时聊天室</title>
+  <title>ZZJ在线聊天室</title>
   <style>
     * {
       margin: 0;
@@ -40,10 +40,21 @@
       font-weight: 600;
     }
 
+    .input-group {
+      margin-bottom: 18px;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: #334155;
+      font-size: 0.9rem;
+    }
+
     .login-input {
       width: 100%;
       padding: 14px 18px;
-      margin-bottom: 16px;
       border: none;
       border-radius: 40px;
       background: white;
@@ -89,6 +100,7 @@
       font-size: 0.8rem;
       margin-top: -8px;
       margin-bottom: 12px;
+      min-height: 20px;
     }
 
     /* 聊天面板 */
@@ -331,8 +343,14 @@
 <!-- 登录面板 -->
 <div id="loginPanel" class="login-container">
   <h2>✨ 加入聊天室</h2>
-  <input type="text" id="usernameInput" class="login-input" placeholder="用户名 (2-12位中英文数字)" maxlength="12" autocomplete="off" />
-  <input type="text" id="roomInput" class="login-input" placeholder="房间名 (例如 lobby)" value="lobby" autocomplete="off" />
+  <div class="input-group">
+    <label>用户名</label>
+    <input type="text" id="usernameInput" class="login-input" placeholder="2-12位中英文数字" maxlength="12" autocomplete="off" />
+  </div>
+  <div class="input-group">
+    <label>房间名</label>
+    <input type="text" id="roomInput" class="login-input" placeholder="例如 lobby" value="lobby" autocomplete="off" />
+  </div>
   <div id="loginError" class="error-message"></div>
   <button id="joinBtn" class="login-btn">进入房间</button>
   <div class="login-hint">用户名在房间内唯一，仅支持中英文数字</div>
@@ -369,7 +387,7 @@
   (function(){
     "use strict";
 
-    const BACKEND_HOST = 'chatapi.zzjjack.us.kg'; // 请改为你的 Worker 域名
+    const BACKEND_HOST = 'chatapi.zzjjack.us.kg'; // 改为你的 Worker 域名
 
     // 状态
     let currentRoom = '';
@@ -379,7 +397,7 @@
     let isConnected = false;
     let reconnectTimer = null;
     let manualDisconnect = false;
-    let pendingMessages = new Map(); // 临时ID -> 真实消息元素，用于发送状态更新
+    let pendingMessages = new Map(); // 临时ID -> 真实消息元素
 
     // DOM 元素
     const loginPanel = document.getElementById('loginPanel');
@@ -437,7 +455,6 @@
       const { type, username, content, timestamp, tempId } = payload;
       const timeStr = formatTime(timestamp || Date.now());
 
-      // 系统消息
       if (type === 'system') {
         row.classList.add('system');
         const bubble = document.createElement('div');
@@ -449,7 +466,6 @@
         return;
       }
 
-      // 聊天消息
       const isSelf = (username === currentUsername);
       row.classList.add(isSelf ? 'self' : 'other');
 
@@ -488,7 +504,6 @@
       return row;
     }
 
-    // 更新临时消息为已发送状态
     function confirmSentMessage(tempId, realPayload) {
       const pending = pendingMessages.get(tempId);
       if (!pending) return;
@@ -496,7 +511,6 @@
       const { timeSpan, bubble } = pending;
       bubble.classList.remove('sending');
       timeSpan.textContent = formatTime(realPayload.timestamp);
-      
       pendingMessages.delete(tempId);
     }
 
@@ -505,7 +519,6 @@
       try {
         const payload = JSON.parse(event.data);
         
-        // 错误处理
         if (payload.type === 'error') {
           alert(`错误: ${payload.message}`);
           if (payload.code === 'DUPLICATE_NAME' || payload.code === 'INVALID_NAME') {
@@ -514,7 +527,6 @@
           return;
         }
 
-        // 如果是聊天消息且包含 tempId (服务器回显了我们发送的临时ID)
         if (payload.type === 'message' && payload.tempId) {
           confirmSentMessage(payload.tempId, payload);
         } else {
@@ -530,7 +542,7 @@
       manualDisconnect = false;
       updateConnectionStatus('connected');
       
-      // 发送初始化消息，携带用户名
+      // 发送初始化消息（仅一次）
       socket.send(JSON.stringify({
         type: 'init',
         username: currentUsername
@@ -591,10 +603,12 @@
       currentUsername = '';
     }
 
-    // 加入房间
+    // 加入房间（带前端校验）
     function joinRoom() {
       const username = usernameInput.value.trim();
       const room = roomInput.value.trim();
+      
+      loginError.textContent = '';
       
       // 前端校验
       const nameRegex = /^[a-zA-Z0-9\u4e00-\u9fa5]{2,12}$/;
@@ -607,7 +621,6 @@
         return;
       }
       
-      loginError.textContent = '';
       currentUsername = username;
       currentRoom = room;
       
@@ -626,7 +639,6 @@
       connectWebSocket(currentRoom);
     }
 
-    // 发送消息（带临时状态）
     function sendMessage(content) {
       if (!content.trim()) return;
       if (!socket || socket.readyState !== WebSocket.OPEN) {
@@ -643,10 +655,8 @@
         tempId: tempId
       };
       
-      // 添加临时消息到界面（发送中）
       addMessageToUI(tempPayload, true);
       
-      // 发送真实消息，附带 tempId 以便服务器回传
       socket.send(JSON.stringify({
         type: 'message',
         content: content.trim(),
@@ -654,7 +664,7 @@
       }));
     }
 
-    // 初始化事件
+    // 事件绑定
     function init() {
       joinBtn.addEventListener('click', joinRoom);
       
