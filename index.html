@@ -5,345 +5,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ZZJ在线聊天室</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(145deg, #f5f7fa 0%, #e9ecf2 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 12px;
-    }
-
-    .login-container {
-      max-width: 400px;
-      width: 100%;
-      background: rgba(255,255,255,0.8);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-radius: 32px;
-      padding: 32px 24px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-      border: 1px solid rgba(255,255,255,0.5);
-    }
-
-    .login-container h2 {
-      margin-bottom: 24px;
-      color: #1e293b;
-      font-weight: 600;
-    }
-
-    .input-group {
-      margin-bottom: 18px;
-    }
-
-    .input-group label {
-      display: block;
-      margin-bottom: 6px;
-      font-weight: 500;
-      color: #334155;
-      font-size: 0.9rem;
-    }
-
-    .login-input {
-      width: 100%;
-      padding: 14px 18px;
-      border: none;
-      border-radius: 40px;
-      background: white;
-      font-size: 1rem;
-      outline: none;
-      border: 1px solid rgba(0,0,0,0.03);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-    }
-
-    .login-input:focus {
-      border-color: #cbd5e1;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.04);
-    }
-
-    .login-btn {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 40px;
-      background: #1e293b;
-      color: white;
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-      transition: all 0.15s;
-    }
-
-    .login-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .login-btn:hover:not(:disabled) {
-      background: #0f172a;
-      transform: scale(1.01);
-    }
-
-    .login-hint {
-      margin-top: 12px;
-      font-size: 0.8rem;
-      color: #64748b;
-      text-align: center;
-    }
-
-    .error-message {
-      color: #ef4444;
-      font-size: 0.8rem;
-      margin-top: -8px;
-      margin-bottom: 12px;
-      min-height: 20px;
-    }
-
-    /* 聊天面板 */
-    .chat-container {
-      width: 100%;
-      max-width: 800px;
-      height: 90vh;
-      max-height: 900px;
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-radius: 32px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.5);
-    }
-
-    .chat-header {
-      padding: 18px 24px;
-      background: rgba(255, 255, 255, 0.4);
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .room-badge {
-      background: #1e293b;
-      color: white;
-      font-weight: 600;
-      padding: 6px 14px;
-      border-radius: 40px;
-      font-size: 0.9rem;
-    }
-
-    .connection-status {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.85rem;
-      color: #475569;
-      background: rgba(255,255,255,0.6);
-      padding: 4px 12px 4px 8px;
-      border-radius: 40px;
-    }
-
-    .status-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #94a3b8;
-    }
-
+    /* 样式与之前相同，此处省略，直接复用上一版完整样式 */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(145deg, #f5f7fa 0%, #e9ecf2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 12px; }
+    .login-container { max-width: 400px; width: 100%; background: rgba(255,255,255,0.8); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 32px; padding: 32px 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.5); }
+    .login-container h2 { margin-bottom: 24px; color: #1e293b; font-weight: 600; }
+    .input-group { margin-bottom: 18px; }
+    .input-group label { display: block; margin-bottom: 6px; font-weight: 500; color: #334155; font-size: 0.9rem; }
+    .login-input { width: 100%; padding: 14px 18px; border: none; border-radius: 40px; background: white; font-size: 1rem; outline: none; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+    .login-input:focus { border-color: #cbd5e1; box-shadow: 0 6px 16px rgba(0,0,0,0.04); }
+    .login-btn { width: 100%; padding: 14px; border: none; border-radius: 40px; background: #1e293b; color: white; font-weight: 600; font-size: 1rem; cursor: pointer; box-shadow: 0 8px 16px rgba(0,0,0,0.1); transition: all 0.15s; }
+    .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .login-btn:hover:not(:disabled) { background: #0f172a; transform: scale(1.01); }
+    .login-hint { margin-top: 12px; font-size: 0.8rem; color: #64748b; text-align: center; }
+    .error-message { color: #ef4444; font-size: 0.8rem; margin-top: -8px; margin-bottom: 12px; min-height: 20px; }
+    .chat-container { width: 100%; max-width: 800px; height: 90vh; max-height: 900px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 32px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08); display: flex; flex-direction: column; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.5); }
+    .chat-header { padding: 18px 24px; background: rgba(255, 255, 255, 0.4); border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+    .room-badge { background: #1e293b; color: white; font-weight: 600; padding: 6px 14px; border-radius: 40px; font-size: 0.9rem; }
+    .connection-status { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #475569; background: rgba(255,255,255,0.6); padding: 4px 12px 4px 8px; border-radius: 40px; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #94a3b8; }
     .status-dot.connected { background: #10b981; }
     .status-dot.connecting { background: #f59e0b; }
     .status-dot.disconnected { background: #ef4444; }
-
-    .header-actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    .btn-icon {
-      background: white;
-      border: none;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: #334155;
-      font-size: 1.2rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      transition: all 0.15s;
-    }
-
-    .btn-icon:hover {
-      background: #f8fafc;
-      transform: scale(1.05);
-    }
-
-    .messages-container {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      scroll-behavior: smooth;
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    .message-row {
-      display: flex;
-      width: 100%;
-      animation: fadeInUp 0.2s ease-out;
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .message-row.system {
-      justify-content: center;
-    }
-
-    .message-row.self {
-      justify-content: flex-end;
-    }
-
-    .message-row.other {
-      justify-content: flex-start;
-    }
-
-    .message-bubble {
-      max-width: 80%;
-      padding: 12px 16px;
-      border-radius: 20px;
-      word-wrap: break-word;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-      line-height: 1.45;
-      font-size: 0.95rem;
-    }
-
-    .system .message-bubble {
-      background: rgba(0,0,0,0.04);
-      backdrop-filter: blur(4px);
-      color: #334155;
-      font-size: 0.8rem;
-      padding: 8px 18px;
-      border-radius: 40px;
-    }
-
-    .self .message-bubble {
-      background: #10b981;
-      color: white;
-      border-bottom-right-radius: 6px;
-    }
-
-    .other .message-bubble {
-      background: white;
-      color: #0f172a;
-      border-bottom-left-radius: 6px;
-      border: 1px solid rgba(0,0,0,0.03);
-    }
-
-    .message-meta {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      margin-bottom: 6px;
-    }
-
-    .self .message-meta {
-      justify-content: flex-end;
-    }
-
-    .message-sender {
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: #1e293b;
-    }
-
-    .self .message-sender {
-      color: white;
-    }
-
-    .message-time {
-      font-size: 0.65rem;
-      opacity: 0.7;
-    }
-
-    .message-content {
-      word-break: break-word;
-    }
-
-    .message-bubble.sending {
-      opacity: 0.6;
-      transition: opacity 0.2s;
-    }
-
-    .chat-footer {
-      padding: 16px 20px;
-      background: rgba(255,255,255,0.5);
-      backdrop-filter: blur(8px);
-      border-top: 1px solid rgba(0,0,0,0.03);
-      display: flex;
-      gap: 12px;
-    }
-
-    .chat-footer input {
-      flex: 1;
-      padding: 14px 18px;
-      border: none;
-      border-radius: 40px;
-      background: white;
-      font-size: 1rem;
-      outline: none;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-    }
-
-    .chat-footer button {
-      background: #1e293b;
-      color: white;
-      border: none;
-      width: 54px;
-      height: 54px;
-      border-radius: 50%;
-      font-size: 1.5rem;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .chat-footer button:hover {
-      background: #0f172a;
-      transform: scale(1.02);
-    }
-
-    .chat-footer button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    @media (max-width: 520px) {
-      body { padding: 0; }
-      .chat-container { height: 100vh; max-height: 100vh; border-radius: 0; }
-    }
+    .header-actions { display: flex; gap: 8px; }
+    .btn-icon { background: white; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #334155; font-size: 1.2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: all 0.15s; }
+    .btn-icon:hover { background: #f8fafc; transform: scale(1.05); }
+    .messages-container { flex: 1; overflow-y: auto; padding: 20px 18px; display: flex; flex-direction: column; gap: 16px; scroll-behavior: smooth; background: rgba(255, 255, 255, 0.2); }
+    .message-row { display: flex; width: 100%; animation: fadeInUp 0.2s ease-out; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .message-row.system { justify-content: center; }
+    .message-row.self { justify-content: flex-end; }
+    .message-row.other { justify-content: flex-start; }
+    .message-bubble { max-width: 80%; padding: 12px 16px; border-radius: 20px; word-wrap: break-word; box-shadow: 0 2px 6px rgba(0,0,0,0.02); line-height: 1.45; font-size: 0.95rem; }
+    .system .message-bubble { background: rgba(0,0,0,0.04); backdrop-filter: blur(4px); color: #334155; font-size: 0.8rem; padding: 8px 18px; border-radius: 40px; }
+    .self .message-bubble { background: #10b981; color: white; border-bottom-right-radius: 6px; }
+    .other .message-bubble { background: white; color: #0f172a; border-bottom-left-radius: 6px; border: 1px solid rgba(0,0,0,0.03); }
+    .message-meta { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+    .self .message-meta { justify-content: flex-end; }
+    .message-sender { font-weight: 700; font-size: 0.95rem; color: #1e293b; }
+    .self .message-sender { color: white; }
+    .message-time { font-size: 0.65rem; opacity: 0.7; }
+    .message-content { word-break: break-word; }
+    .message-bubble.sending { opacity: 0.6; transition: opacity 0.2s; }
+    .chat-footer { padding: 16px 20px; background: rgba(255,255,255,0.5); backdrop-filter: blur(8px); border-top: 1px solid rgba(0,0,0,0.03); display: flex; gap: 12px; }
+    .chat-footer input { flex: 1; padding: 14px 18px; border: none; border-radius: 40px; background: white; font-size: 1rem; outline: none; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+    .chat-footer button { background: #1e293b; color: white; border: none; width: 54px; height: 54px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; transition: all 0.15s; }
+    .chat-footer button:hover { background: #0f172a; transform: scale(1.02); }
+    .chat-footer button:disabled { opacity: 0.5; cursor: not-allowed; }
+    @media (max-width: 520px) { body { padding: 0; } .chat-container { height: 100vh; max-height: 100vh; border-radius: 0; } }
   </style>
 </head>
 <body>
 
-<!-- 登录面板 -->
 <div id="loginPanel" class="login-container">
   <h2>✨ 加入聊天室</h2>
   <div class="input-group">
@@ -359,7 +72,6 @@
   <div class="login-hint">用户名在房间内唯一，仅支持中英文数字</div>
 </div>
 
-<!-- 聊天面板（默认隐藏） -->
 <div id="chatPanel" class="chat-container" style="display: none;">
   <div class="chat-header">
     <div style="display: flex; align-items: center; gap: 12px;">
@@ -390,7 +102,7 @@
   (function(){
     "use strict";
 
-    const BACKEND_HOST = 'chatapi.zzjjack.us.kg'; // 替换为你的 Worker 域名
+    const BACKEND_HOST = 'chatapi.zzjjack.us.kg'; // 替换为你的域名
 
     let currentRoom = '';
     let currentUsername = '';
@@ -399,8 +111,8 @@
     let reconnectTimer = null;
     let manualDisconnect = false;
     let pendingMessages = new Map();
+    let heartbeatInterval = null;
 
-    // DOM 元素
     const loginPanel = document.getElementById('loginPanel');
     const chatPanel = document.getElementById('chatPanel');
     const usernameInput = document.getElementById('usernameInput');
@@ -418,7 +130,6 @@
     const clearChatBtn = document.getElementById('clearChatBtn');
     const leaveRoomBtn = document.getElementById('leaveRoomBtn');
 
-    // 工具函数
     function formatTime(timestamp) {
       const date = new Date(timestamp);
       return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
@@ -512,10 +223,28 @@
       pendingMessages.delete(tempId);
     }
 
-    // WebSocket 处理
+    // 心跳发送
+    function startHeartbeat() {
+      if (heartbeatInterval) clearInterval(heartbeatInterval);
+      heartbeatInterval = setInterval(() => {
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify({ type: 'ping' }));
+        }
+      }, 15000); // 每 15 秒
+    }
+
+    function stopHeartbeat() {
+      if (heartbeatInterval) {
+        clearInterval(heartbeatInterval);
+        heartbeatInterval = null;
+      }
+    }
+
     function handleSocketMessage(event) {
       try {
         const payload = JSON.parse(event.data);
+        
+        if (payload.type === 'pong') return; // 忽略 pong
         
         if (payload.type === 'error') {
           alert(`错误: ${payload.message}`);
@@ -539,6 +268,7 @@
       isConnected = true;
       manualDisconnect = false;
       updateConnectionStatus('connected');
+      startHeartbeat();
       
       socket.send(JSON.stringify({
         type: 'init',
@@ -549,6 +279,7 @@
     function handleSocketClose() {
       isConnected = false;
       updateConnectionStatus('disconnected');
+      stopHeartbeat();
       if (!manualDisconnect) {
         scheduleReconnect();
       }
@@ -589,6 +320,7 @@
 
     function disconnectAndShowLogin() {
       manualDisconnect = true;
+      stopHeartbeat();
       if (socket) {
         socket.close();
         socket = null;
@@ -600,7 +332,6 @@
       currentUsername = '';
     }
 
-    // 检查用户名是否重复
     async function checkUsernameAvailability(room, username) {
       try {
         const response = await fetch(`https://${BACKEND_HOST}/check?room=${encodeURIComponent(room)}&username=${encodeURIComponent(username)}`);
@@ -612,14 +343,12 @@
       }
     }
 
-    // 加入房间（带用户名重复检查）
     async function joinRoom() {
       const username = usernameInput.value.trim();
       const room = roomInput.value.trim();
       
       loginError.textContent = '';
       
-      // 前端格式校验
       const nameRegex = /^[a-zA-Z0-9\u4e00-\u9fa5]{2,12}$/;
       if (!nameRegex.test(username)) {
         loginError.textContent = '用户名必须为2-12位中英文或数字';
@@ -630,11 +359,9 @@
         return;
       }
 
-      // 禁用按钮，显示检查中状态
       joinBtn.disabled = true;
       joinBtn.textContent = '检查中...';
       
-      // 检查用户名是否重复
       const available = await checkUsernameAvailability(room, username);
       
       if (!available) {
@@ -644,7 +371,6 @@
         return;
       }
 
-      // 校验通过，准备进入
       currentUsername = username;
       currentRoom = room;
       roomNameSpan.textContent = `# ${currentRoom} (${currentUsername})`;
@@ -661,7 +387,6 @@
       
       connectWebSocket(currentRoom);
       
-      // 恢复按钮状态（但界面已切换）
       joinBtn.disabled = false;
       joinBtn.textContent = '进入房间';
     }
@@ -691,48 +416,16 @@
       }));
     }
 
-    // 事件绑定
     function init() {
       joinBtn.addEventListener('click', joinRoom);
-      
-      usernameInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') joinRoom();
-      });
-      roomInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') joinRoom();
-      });
-      
-      sendBtn.addEventListener('click', () => {
-        sendMessage(messageInput.value);
-        messageInput.value = '';
-      });
-      
-      messageInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          sendMessage(messageInput.value);
-          messageInput.value = '';
-        }
-      });
-      
-      reconnectBtn.addEventListener('click', () => {
-        if (currentRoom) {
-          manualDisconnect = false;
-          if (reconnectTimer) clearTimeout(reconnectTimer);
-          connectWebSocket(currentRoom);
-        }
-      });
-      
+      usernameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') joinRoom(); });
+      roomInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') joinRoom(); });
+      sendBtn.addEventListener('click', () => { sendMessage(messageInput.value); messageInput.value = ''; });
+      messageInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(messageInput.value); messageInput.value = ''; } });
+      reconnectBtn.addEventListener('click', () => { if (currentRoom) { manualDisconnect = false; if (reconnectTimer) clearTimeout(reconnectTimer); connectWebSocket(currentRoom); } });
       clearChatBtn.addEventListener('click', clearMessages);
-      
-      leaveRoomBtn.addEventListener('click', () => {
-        disconnectAndShowLogin();
-      });
-      
-      window.addEventListener('beforeunload', () => {
-        manualDisconnect = true;
-        if (socket) socket.close();
-      });
+      leaveRoomBtn.addEventListener('click', () => { disconnectAndShowLogin(); });
+      window.addEventListener('beforeunload', () => { manualDisconnect = true; stopHeartbeat(); if (socket) socket.close(); });
     }
 
     init();
