@@ -570,7 +570,7 @@
         socket = null;
       }
       updateConnectionStatus('connecting');
-      const wsUrl = `wss://${BACKEND_HOST}/room/${roomName}`;
+      const wsUrl = `wss://${BACKEND_HOST}/room/${roomName}/ws`;
       try {
         socket = new WebSocket(wsUrl);
         socket.addEventListener('open', handleSocketOpen);
