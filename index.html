@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ZZJ-JACK聊天室</title>
+  <title>ZZJ实时聊天室</title>
   <style>
     * {
       margin: 0;
@@ -12,7 +12,7 @@
     }
 
     body {
-      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
       background: linear-gradient(145deg, #f5f7fa 0%, #e9ecf2 100%);
       min-height: 100vh;
       display: flex;
@@ -21,6 +21,77 @@
       padding: 12px;
     }
 
+    /* 登录面板 */
+    .login-container {
+      max-width: 400px;
+      width: 100%;
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 32px;
+      padding: 32px 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+
+    .login-container h2 {
+      margin-bottom: 24px;
+      color: #1e293b;
+      font-weight: 600;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      border: none;
+      border-radius: 40px;
+      background: white;
+      font-size: 1rem;
+      outline: none;
+      border: 1px solid rgba(0,0,0,0.03);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+
+    .login-input:focus {
+      border-color: #cbd5e1;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 40px;
+      background: #1e293b;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      transition: all 0.15s;
+    }
+
+    .login-btn:hover {
+      background: #0f172a;
+      transform: scale(1.01);
+    }
+
+    .login-hint {
+      margin-top: 12px;
+      font-size: 0.8rem;
+      color: #64748b;
+      text-align: center;
+    }
+
+    .error-message {
+      color: #ef4444;
+      font-size: 0.8rem;
+      margin-top: -8px;
+      margin-bottom: 12px;
+    }
+
+    /* 聊天面板 */
     .chat-container {
       width: 100%;
       max-width: 800px;
@@ -30,7 +101,7 @@
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-radius: 32px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 6px 12px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -40,19 +111,12 @@
     .chat-header {
       padding: 18px 24px;
       background: rgba(255, 255, 255, 0.4);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 10px;
-    }
-
-    .room-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
     }
 
     .room-badge {
@@ -62,57 +126,6 @@
       padding: 6px 14px;
       border-radius: 40px;
       font-size: 0.9rem;
-      letter-spacing: 0.3px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    }
-
-    .room-control {
-      display: flex;
-      gap: 6px;
-    }
-
-    .room-control input {
-      padding: 6px 12px;
-      border-radius: 40px;
-      border: 1px solid rgba(0,0,0,0.1);
-      background: white;
-      font-size: 0.85rem;
-      outline: none;
-      width: 140px;
-    }
-
-    .room-control button {
-      background: white;
-      border: none;
-      padding: 6px 14px;
-      border-radius: 40px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-      border: 1px solid rgba(0,0,0,0.02);
-      transition: all 0.15s;
-    }
-
-    .room-control button:hover {
-      background: #1e293b;
-      color: white;
-    }
-
-    .user-control {
-      display: flex;
-      gap: 6px;
-      margin-left: 6px;
-    }
-
-    .user-control input {
-      padding: 6px 12px;
-      border-radius: 40px;
-      border: 1px solid rgba(0,0,0,0.1);
-      background: white;
-      font-size: 0.85rem;
-      outline: none;
-      width: 120px;
     }
 
     .connection-status {
@@ -121,7 +134,7 @@
       gap: 6px;
       font-size: 0.85rem;
       color: #475569;
-      background: rgba(255, 255, 255, 0.6);
+      background: rgba(255,255,255,0.6);
       padding: 4px 12px 4px 8px;
       border-radius: 40px;
     }
@@ -131,10 +144,9 @@
       height: 10px;
       border-radius: 50%;
       background: #94a3b8;
-      transition: background 0.2s;
     }
 
-    .status-dot.connected { background: #10b981; box-shadow: 0 0 8px #10b98180; }
+    .status-dot.connected { background: #10b981; }
     .status-dot.connecting { background: #f59e0b; }
     .status-dot.disconnected { background: #ef4444; }
 
@@ -155,15 +167,13 @@
       cursor: pointer;
       color: #334155;
       font-size: 1.2rem;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
       transition: all 0.15s;
-      border: 1px solid rgba(0, 0, 0, 0.02);
     }
 
     .btn-icon:hover {
       background: #f8fafc;
       transform: scale(1.05);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.06);
     }
 
     .messages-container {
@@ -172,7 +182,7 @@
       padding: 20px 18px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
       scroll-behavior: smooth;
       background: rgba(255, 255, 255, 0.2);
     }
@@ -180,6 +190,12 @@
     .message-row {
       display: flex;
       width: 100%;
+      animation: fadeInUp 0.2s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .message-row.system {
@@ -199,89 +215,76 @@
       padding: 12px 16px;
       border-radius: 20px;
       word-wrap: break-word;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-      position: relative;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
       line-height: 1.45;
       font-size: 0.95rem;
     }
 
     .system .message-bubble {
-      background: rgba(0, 0, 0, 0.04);
+      background: rgba(0,0,0,0.04);
       backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
       color: #334155;
       font-size: 0.8rem;
       padding: 8px 18px;
       border-radius: 40px;
-      font-weight: 450;
-      border: 1px solid rgba(0, 0, 0, 0.02);
     }
 
-    /* 自己的消息：靠右，绿色背景 */
     .self .message-bubble {
       background: #10b981;
       color: white;
       border-bottom-right-radius: 6px;
     }
 
-    /* 他人的消息：靠左，白色背景 */
     .other .message-bubble {
       background: white;
       color: #0f172a;
       border-bottom-left-radius: 6px;
-      border: 1px solid rgba(0, 0, 0, 0.03);
+      border: 1px solid rgba(0,0,0,0.03);
     }
 
     .message-meta {
       display: flex;
-      align-items: center;
+      align-items: baseline;
       gap: 8px;
-      margin-bottom: 4px;
-      font-size: 0.7rem;
-      opacity: 0.7;
+      margin-bottom: 6px;
     }
 
     .self .message-meta {
       justify-content: flex-end;
-      color: rgba(255, 255, 255, 0.8);
-    }
-
-    .other .message-meta {
-      color: #475569;
-    }
-
-    .message-time {
-      font-feature-settings: "tnum";
     }
 
     .message-sender {
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #1e293b;
     }
 
     .self .message-sender {
-      display: none; /* 自己的消息不显示用户名 */
+      color: white;
     }
 
-    .system .message-meta {
-      display: none;
+    .message-time {
+      font-size: 0.65rem;
+      opacity: 0.7;
     }
 
-    .empty-messages {
-      text-align: center;
-      color: #64748b;
-      margin-top: 40px;
-      font-size: 0.9rem;
+    .message-content {
+      word-break: break-word;
+    }
+
+    /* 发送中状态 */
+    .message-bubble.sending {
+      opacity: 0.6;
+      transition: opacity 0.2s;
     }
 
     .chat-footer {
       padding: 16px 20px;
-      background: rgba(255, 255, 255, 0.5);
+      background: rgba(255,255,255,0.5);
       backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border-top: 1px solid rgba(0, 0, 0, 0.03);
+      border-top: 1px solid rgba(0,0,0,0.03);
       display: flex;
       gap: 12px;
-      align-items: center;
     }
 
     .chat-footer input {
@@ -292,14 +295,7 @@
       background: white;
       font-size: 1rem;
       outline: none;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
-      border: 1px solid rgba(0, 0, 0, 0.03);
-      transition: box-shadow 0.2s, border 0.2s;
-    }
-
-    .chat-footer input:focus {
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
-      border-color: #cbd5e1;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
     }
 
     .chat-footer button {
@@ -309,69 +305,63 @@
       width: 54px;
       height: 54px;
       border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
       font-size: 1.5rem;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
       transition: all 0.15s;
-      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .chat-footer button:hover {
       background: #0f172a;
       transform: scale(1.02);
-      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
     }
 
     .chat-footer button:disabled {
       opacity: 0.5;
       cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
     }
 
     @media (max-width: 520px) {
       body { padding: 0; }
       .chat-container { height: 100vh; max-height: 100vh; border-radius: 0; }
-      .chat-header { padding: 14px 16px; }
-      .messages-container { padding: 14px 12px; }
-      .message-bubble { max-width: 90%; }
-      .room-control input, .user-control input { width: 100px; }
     }
   </style>
 </head>
 <body>
-<div class="chat-container">
+
+<!-- 登录面板 -->
+<div id="loginPanel" class="login-container">
+  <h2>✨ 加入聊天室</h2>
+  <input type="text" id="usernameInput" class="login-input" placeholder="用户名 (2-12位中英文数字)" maxlength="12" autocomplete="off" />
+  <input type="text" id="roomInput" class="login-input" placeholder="房间名 (例如 lobby)" value="lobby" autocomplete="off" />
+  <div id="loginError" class="error-message"></div>
+  <button id="joinBtn" class="login-btn">进入房间</button>
+  <div class="login-hint">用户名在房间内唯一，仅支持中英文数字</div>
+</div>
+
+<!-- 聊天面板（默认隐藏） -->
+<div id="chatPanel" class="chat-container" style="display: none;">
   <div class="chat-header">
-    <div class="room-info">
-      <span class="room-badge" id="roomNameDisplay">未加入房间</span>
-      <div class="room-control">
-        <input type="text" id="roomInput" placeholder="房间名" />
-        <button id="joinRoomBtn">加入</button>
-      </div>
-      <div class="user-control">
-        <input type="text" id="usernameInput" placeholder="你的昵称" maxlength="20" />
-      </div>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span class="room-badge" id="roomNameDisplay"></span>
       <div class="connection-status">
         <span class="status-dot" id="connectionDot"></span>
-        <span id="statusText">未连接</span>
+        <span id="statusText">连接中</span>
       </div>
     </div>
     <div class="header-actions">
       <button class="btn-icon" id="reconnectBtn" title="重新连接">↻</button>
       <button class="btn-icon" id="clearChatBtn" title="清屏">⌧</button>
+      <button class="btn-icon" id="leaveRoomBtn" title="离开房间">🚪</button>
     </div>
   </div>
 
   <div class="messages-container" id="messagesContainer">
-    <div class="empty-messages">✨ 设置昵称并输入房间名，点击「加入」开始聊天</div>
+    <div class="empty-messages" style="text-align:center;color:#64748b;margin-top:40px;">✨ 欢迎来到房间，开始聊天吧</div>
   </div>
 
   <div class="chat-footer">
     <input type="text" id="messageInput" placeholder="输入消息..." autocomplete="off" disabled />
-    <button id="sendBtn" title="发送 (Enter)" disabled>➤</button>
+    <button id="sendBtn" disabled>➤</button>
   </div>
 </div>
 
@@ -379,21 +369,27 @@
   (function(){
     "use strict";
 
-    // ---------- 配置 ----------
-    const BACKEND_HOST = 'chatapi.zzjjack.us.kg';  // 修改为你的 Worker 域名
+    const BACKEND_HOST = 'chatapi.zzjjack.us.kg'; // 请改为你的 Worker 域名
+
+    // 状态
     let currentRoom = '';
+    let currentUsername = '';
     let socket = null;
     let clientId = null;
-    let myUsername = '';
     let isConnected = false;
     let reconnectTimer = null;
     let manualDisconnect = false;
+    let pendingMessages = new Map(); // 临时ID -> 真实消息元素，用于发送状态更新
 
     // DOM 元素
-    const roomNameSpan = document.getElementById('roomNameDisplay');
-    const roomInput = document.getElementById('roomInput');
+    const loginPanel = document.getElementById('loginPanel');
+    const chatPanel = document.getElementById('chatPanel');
     const usernameInput = document.getElementById('usernameInput');
-    const joinRoomBtn = document.getElementById('joinRoomBtn');
+    const roomInput = document.getElementById('roomInput');
+    const joinBtn = document.getElementById('joinBtn');
+    const loginError = document.getElementById('loginError');
+    
+    const roomNameSpan = document.getElementById('roomNameDisplay');
     const statusDot = document.getElementById('connectionDot');
     const statusText = document.getElementById('statusText');
     const messagesContainer = document.getElementById('messagesContainer');
@@ -401,8 +397,9 @@
     const sendBtn = document.getElementById('sendBtn');
     const reconnectBtn = document.getElementById('reconnectBtn');
     const clearChatBtn = document.getElementById('clearChatBtn');
+    const leaveRoomBtn = document.getElementById('leaveRoomBtn');
 
-    // ---------- 工具函数 ----------
+    // 工具函数
     function formatTime(timestamp) {
       const date = new Date(timestamp);
       return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
@@ -417,14 +414,8 @@
       const s = statusMap[state] || statusMap.disconnected;
       statusText.textContent = s.text;
       statusDot.className = `status-dot ${s.class}`;
-      
       sendBtn.disabled = !isConnected;
       messageInput.disabled = !isConnected;
-      if (!isConnected) {
-        messageInput.placeholder = '未连接，无法发送';
-      } else {
-        messageInput.placeholder = '输入消息...';
-      }
     }
 
     function scrollToBottom() {
@@ -432,83 +423,105 @@
     }
 
     function clearMessages() {
-      messagesContainer.innerHTML = '<div class="empty-messages">✨ 对话已清空，开始聊天吧</div>';
+      messagesContainer.innerHTML = '<div class="empty-messages" style="text-align:center;color:#64748b;margin-top:40px;">✨ 对话已清空</div>';
     }
 
-    function addMessageToUI(payload) {
+    // 添加消息到界面
+    function addMessageToUI(payload, isPending = false) {
       const emptyMsg = messagesContainer.querySelector('.empty-messages');
       if (emptyMsg) emptyMsg.remove();
 
       const row = document.createElement('div');
       row.className = 'message-row';
 
-      const { type, clientId: msgClientId, username, content, timestamp } = payload;
+      const { type, username, content, timestamp, tempId } = payload;
       const timeStr = formatTime(timestamp || Date.now());
 
+      // 系统消息
       if (type === 'system') {
         row.classList.add('system');
         const bubble = document.createElement('div');
         bubble.className = 'message-bubble';
-        bubble.textContent = content || '';
+        bubble.textContent = content;
         row.appendChild(bubble);
         messagesContainer.appendChild(row);
         scrollToBottom();
         return;
       }
 
-      // 判断是否为自己的消息（通过 clientId 匹配）
-      const isSelf = (msgClientId && clientId && msgClientId === clientId);
+      // 聊天消息
+      const isSelf = (username === currentUsername);
       row.classList.add(isSelf ? 'self' : 'other');
 
       const bubble = document.createElement('div');
       bubble.className = 'message-bubble';
+      if (isPending) bubble.classList.add('sending');
 
       const meta = document.createElement('div');
       meta.className = 'message-meta';
-      
-      if (!isSelf) {
-        const senderSpan = document.createElement('span');
-        senderSpan.className = 'message-sender';
-        senderSpan.textContent = username || (msgClientId ? `用户 ${msgClientId.slice(0,6)}` : '匿名');
-        meta.appendChild(senderSpan);
-      }
+
+      const senderSpan = document.createElement('span');
+      senderSpan.className = 'message-sender';
+      senderSpan.textContent = username || '未知';
+      meta.appendChild(senderSpan);
 
       const timeSpan = document.createElement('span');
       timeSpan.className = 'message-time';
-      timeSpan.textContent = timeStr;
+      timeSpan.textContent = isPending ? '发送中...' : timeStr;
       meta.appendChild(timeSpan);
 
       bubble.appendChild(meta);
 
       const contentDiv = document.createElement('div');
       contentDiv.className = 'message-content';
-      contentDiv.textContent = content || '';
+      contentDiv.textContent = content;
       bubble.appendChild(contentDiv);
 
       row.appendChild(bubble);
       messagesContainer.appendChild(row);
+      
+      if (isPending && tempId) {
+        pendingMessages.set(tempId, { row, bubble, timeSpan });
+      }
+      
       scrollToBottom();
+      return row;
     }
 
-    // ---------- WebSocket 处理 ----------
+    // 更新临时消息为已发送状态
+    function confirmSentMessage(tempId, realPayload) {
+      const pending = pendingMessages.get(tempId);
+      if (!pending) return;
+      
+      const { timeSpan, bubble } = pending;
+      bubble.classList.remove('sending');
+      timeSpan.textContent = formatTime(realPayload.timestamp);
+      
+      pendingMessages.delete(tempId);
+    }
+
+    // WebSocket 处理
     function handleSocketMessage(event) {
       try {
         const payload = JSON.parse(event.data);
         
-        // 从欢迎消息中提取 clientId
-        if (payload.type === 'system' && payload.clientId && !clientId) {
-          clientId = payload.clientId;
-          console.log('自己的 clientId:', clientId);
+        // 错误处理
+        if (payload.type === 'error') {
+          alert(`错误: ${payload.message}`);
+          if (payload.code === 'DUPLICATE_NAME' || payload.code === 'INVALID_NAME') {
+            disconnectAndShowLogin();
+          }
+          return;
         }
-        
-        addMessageToUI(payload);
+
+        // 如果是聊天消息且包含 tempId (服务器回显了我们发送的临时ID)
+        if (payload.type === 'message' && payload.tempId) {
+          confirmSentMessage(payload.tempId, payload);
+        } else {
+          addMessageToUI(payload);
+        }
       } catch (e) {
         console.warn('非 JSON 消息:', event.data);
-        addMessageToUI({
-          type: 'system',
-          content: event.data,
-          timestamp: Date.now()
-        });
       }
     }
 
@@ -517,14 +530,16 @@
       manualDisconnect = false;
       updateConnectionStatus('connected');
       
-      // 如果已设置用户名，发送设置用户名消息（可选，后端未强制要求）
-      // 这里我们选择在每条消息中携带用户名，故不单独发送。
+      // 发送初始化消息，携带用户名
+      socket.send(JSON.stringify({
+        type: 'init',
+        username: currentUsername
+      }));
     }
 
     function handleSocketClose(event) {
       isConnected = false;
       updateConnectionStatus('disconnected');
-      
       if (!manualDisconnect) {
         scheduleReconnect();
       }
@@ -538,7 +553,7 @@
       if (reconnectTimer) clearTimeout(reconnectTimer);
       updateConnectionStatus('connecting');
       reconnectTimer = setTimeout(() => {
-        if (currentRoom) {
+        if (currentRoom && currentUsername) {
           connectWebSocket(currentRoom);
         }
       }, 3000);
@@ -549,12 +564,8 @@
         socket.close();
         socket = null;
       }
-      
       updateConnectionStatus('connecting');
-      clientId = null;
-      
       const wsUrl = `wss://${BACKEND_HOST}/room/${roomName}`;
-      
       try {
         socket = new WebSocket(wsUrl);
         socket.addEventListener('open', handleSocketOpen);
@@ -567,67 +578,91 @@
       }
     }
 
-    function joinRoom(roomName) {
-      if (!roomName.trim()) {
-        alert('请输入房间名');
-        return;
-      }
-      
-      // 获取用户名，默认使用 "匿名" + 随机数
-      let username = usernameInput.value.trim();
-      if (!username) {
-        username = `访客${Math.floor(Math.random()*1000)}`;
-        usernameInput.value = username;
-      }
-      myUsername = username;
-      
-      // 断开旧连接
+    function disconnectAndShowLogin() {
+      manualDisconnect = true;
       if (socket) {
-        manualDisconnect = true;
         socket.close();
         socket = null;
       }
+      isConnected = false;
+      chatPanel.style.display = 'none';
+      loginPanel.style.display = 'block';
+      currentRoom = '';
+      currentUsername = '';
+    }
+
+    // 加入房间
+    function joinRoom() {
+      const username = usernameInput.value.trim();
+      const room = roomInput.value.trim();
       
-      currentRoom = roomName.trim();
-      roomNameSpan.textContent = `# ${currentRoom}`;
+      // 前端校验
+      const nameRegex = /^[a-zA-Z0-9\u4e00-\u9fa5]{2,12}$/;
+      if (!nameRegex.test(username)) {
+        loginError.textContent = '用户名必须为2-12位中英文或数字';
+        return;
+      }
+      if (!room) {
+        loginError.textContent = '请输入房间名';
+        return;
+      }
+      
+      loginError.textContent = '';
+      currentUsername = username;
+      currentRoom = room;
+      
+      roomNameSpan.textContent = `# ${currentRoom} (${currentUsername})`;
+      
+      loginPanel.style.display = 'none';
+      chatPanel.style.display = 'flex';
       
       clearMessages();
       addMessageToUI({
         type: 'system',
-        content: `正在加入房间 ${currentRoom}，你的昵称: ${myUsername}`,
+        content: `正在连接房间 ${currentRoom} ...`,
         timestamp: Date.now()
       });
       
       connectWebSocket(currentRoom);
     }
 
+    // 发送消息（带临时状态）
     function sendMessage(content) {
       if (!content.trim()) return;
       if (!socket || socket.readyState !== WebSocket.OPEN) {
-        alert('连接已断开，请稍后重试');
+        alert('连接已断开');
         return;
       }
       
-      const message = {
+      const tempId = crypto.randomUUID();
+      const tempPayload = {
         type: 'message',
-        username: myUsername,
+        username: currentUsername,
         content: content.trim(),
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        tempId: tempId
       };
       
-      socket.send(JSON.stringify(message));
+      // 添加临时消息到界面（发送中）
+      addMessageToUI(tempPayload, true);
+      
+      // 发送真实消息，附带 tempId 以便服务器回传
+      socket.send(JSON.stringify({
+        type: 'message',
+        content: content.trim(),
+        tempId: tempId
+      }));
     }
 
-    // ---------- 事件绑定与初始化 ----------
+    // 初始化事件
     function init() {
-      joinRoomBtn.addEventListener('click', () => {
-        joinRoom(roomInput.value);
-      });
+      joinBtn.addEventListener('click', joinRoom);
       
+      usernameInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') joinRoom();
+      });
       roomInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          joinRoom(roomInput.value);
-        }
+        if (e.key === 'Enter') joinRoom();
       });
       
       sendBtn.addEventListener('click', () => {
@@ -646,26 +681,21 @@
       reconnectBtn.addEventListener('click', () => {
         if (currentRoom) {
           manualDisconnect = false;
-          if (reconnectTimer) {
-            clearTimeout(reconnectTimer);
-            reconnectTimer = null;
-          }
+          if (reconnectTimer) clearTimeout(reconnectTimer);
           connectWebSocket(currentRoom);
-        } else {
-          alert('请先加入一个房间');
         }
       });
       
-      clearChatBtn.addEventListener('click', () => {
-        clearMessages();
+      clearChatBtn.addEventListener('click', clearMessages);
+      
+      leaveRoomBtn.addEventListener('click', () => {
+        disconnectAndShowLogin();
       });
       
       window.addEventListener('beforeunload', () => {
         manualDisconnect = true;
         if (socket) socket.close();
       });
-
-      updateConnectionStatus('disconnected');
     }
 
     init();
